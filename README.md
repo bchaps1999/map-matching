@@ -1,5 +1,5 @@
 # Map-matching geospatial data using R
-<img align="right" src="https://github.com/bchaps1999/map-matching/blob/master/images/Sao_Paulo.png">
+<img align="right" src="https://github.com/bchaps1999/map-matching/blob/master/images/Sao_Paulo.png" width="100">
 
 ## Background
 

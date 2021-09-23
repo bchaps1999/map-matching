@@ -14,7 +14,7 @@ This repository contains generalized versions of scripts that match points to a 
 
 ## Description
 
-#### `map_matching.R`
+### 1. `map_matching.R`
 
 <img src="https://github.com/bchaps1999/map-matching/blob/master/images/map_matching.png" align="right" width="500" alt="An example of map-matching">
 

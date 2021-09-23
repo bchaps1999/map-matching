@@ -14,6 +14,8 @@ This repository contains generalized versions of scripts that match points to a 
 
 ## Description
 
+#### `map_matching.R`
+
 <img src="https://github.com/bchaps1999/map-matching/blob/master/images/map_matching.png" align="right" width="500" alt="An example of map-matching">
 
 The first script identifies all roads within a certain radius of each entity, and then gives each road a score based on the distance from the camera and the similarity between the road name and the entity location description. The road with the best score is selected as the match for a specific entity, and the closest point on that road is then selected as the new map-matched coordinates for that entity. An example of this is shown in the image at right, where the red dots are the original camera locations and the blue dots use the map-matched coordinates.

@@ -2,10 +2,7 @@
 
 ## Background
 
-<figure>
-  <img src="https://github.com/bchaps1999/map-matching/blob/master/images/Sao_Paulo.png">
-  <figcaption>A map of central São Paulo, Brazil - blue dots are traffic cameras</figcaption>
-</figure>
+<img src="https://github.com/bchaps1999/map-matching/blob/master/images/Sao_Paulo.png" align="right" width="500" alt="A map of central São Paulo, Brazil">
 
 When conducting analyses involving vehicles or roads, geospatial data is only of limited use if it is not accurately matched to a map of the area. For example, if we want to know the effects of traffic camera placement on accidents, then it is necessary that we know exactly where each camera is located and on what road. A high level of accuracy is important especially with the treatment variable to limit attenuation bias, but it is also important for the response variable if we want to produce precise coefficients.
 
@@ -17,7 +14,9 @@ This repository contains generalized versions of scripts that match points to a 
 
 ## Description
 
-The first script identifies all roads within a certain radius of each entity, and then gives each road a score based on the distance from the camera and the similarity between the road name and the entity location description. The road with the best score is selected as the match for a specific entity, and the closest point on that road is then selected as the new map-matched coordinates for that entity. 
+<img src="https://github.com/bchaps1999/map-matching/blob/master/images/map_matching.png" align="right" width="500" alt="An example of map-matching">
+
+The first script identifies all roads within a certain radius of each entity, and then gives each road a score based on the distance from the camera and the similarity between the road name and the entity location description. The road with the best score is selected as the match for a specific entity, and the closest point on that road is then selected as the new map-matched coordinates for that entity. An example of this is shown in the image at right, where the red dots are the original camera locations and the blue dots use the map-matched coordinates.
 
 The second script includes a handful of helper functions that support the manual checking process. In the case of the São Paulo project, traffic cameras were easily visible on Google Maps Street View, which allows the location of each camera to be easily verified. Although each camera still needed to be individually checked, the functions accelerated this process by automating tasks like replacing bad coordinates with better ones. However, depending on the type of entity, manual checking may either be unnecessary or impossible for other projects. 
 

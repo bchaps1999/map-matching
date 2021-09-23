@@ -1,7 +1,8 @@
 # Map-matching geospatial data using R
-<img align="right" src="https://github.com/bchaps1999/map-matching/blob/master/images/Sao_Paulo.png" width="100">
 
 ## Background
+
+<img align="right" src="https://github.com/bchaps1999/map-matching/blob/master/images/Sao_Paulo.png" width="500">
 
 When conducting analyses involving vehicles or roads, geospatial data is only of limited use if it is not accurately matched to a map of the area. For example, if we want to know the effects of traffic camera placement on accidents, then it is necessary that we know exactly where each camera is located and on what road. A high level of accuracy is important especially with the treatment variable to limit attenuation bias, but it is also important for the response variable if we want to produce precise coefficients.
 

@@ -16,13 +16,13 @@ This repository contains generalized versions of scripts that match points to a 
 
 #### 1. `map_matching.R`
 
-<img src="https://github.com/bchaps1999/map-matching/blob/master/images/map_matching.png" align="right" width="500" alt="An example of map-matching">
+<img src="https://github.com/bchaps1999/map-matching/blob/master/images/map_matching.png" align="right" width="400" alt="An example of map-matching">
 
 The first script identifies all roads within a certain radius of each entity, and then gives each road a score based on the distance from the camera and the similarity between the road name and the entity location description. The road with the best score is selected as the match for a specific entity, and the closest point on that road is then selected as the new map-matched coordinates for that entity. An example of this is shown in the image at right, where the red dots are the original camera locations and the blue dots use the map-matched coordinates.
 
 #### 2. `manual_check.R`
 
-<img src="https://github.com/bchaps1999/map-matching/blob/master/images/map_matching.png" align="right" width="500" alt="An example of the map-match function">
+<img src="https://github.com/bchaps1999/map-matching/blob/master/images/map_match_function.png" align="right" width="400" alt="An example of the map-match function">
 
 The second script includes a handful of helper functions that support the manual checking process. In the case of the São Paulo project, traffic cameras were easily visible on Google Maps Street View, which allows the location of each camera to be easily verified. Although each camera still needed to be individually checked, the functions accelerated this process by automating tasks like replacing bad coordinates with better ones. However, depending on the type of entity, manual checking may either be unnecessary or impossible for other projects. The image at right shows the output of the `map_match` function for one of the cameras in the data: it shows the original camera location (blue), the map-matched camera location (red), and the possible road segment matches.
 

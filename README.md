@@ -32,25 +32,64 @@ The third script is likely to be the least adaptable to other projects, as it ad
 
 ## Usage
 
-To walk you through how these scripts should be implemented, let's use as an example the project for which this code was initially created. In that project, we were analyzing the impact of traffic cameras on driver behavior in São Paulo, specifically through changes in the number of accidents. For that project, our treatment variable was the "launch" of a camera at a given location. As I previously mentioned, this information came from a data set from São Paulo with millions of traffic tickets, where each observation was a different ticket. By selecting only for tickets that were recorded by cameras, and then grouping together tickets with the same coordinates and location description, the resulting data featured all the unique locations where tickets were recorded by cameras; in other words, the tickets could be summarized to gain a full list of cameras in São Paulo. We assume that your treatment variable data will also be in the form of individual observations, from which information can be extracted about the location of individual points or entities. If not, the first few chunks of code in `map_matching.R` will need to be adjusted. 
+To walk you through how these scripts should be implemented, let's use as an example the project for which this code was initially created. In that project, we were analyzing the impact of traffic cameras on driver behavior in São Paulo, specifically through changes in the number of accidents. For that project, our treatment variable was the "launch" of a camera at a given location. As I previously mentioned, this information is from a data set from São Paulo with millions of traffic tickets, where each observation was a different ticket. By filtering for tickets that were recorded by cameras, and then grouping together tickets with the same coordinates and location description, the resulting data featured all the unique locations where tickets were recorded by cameras; in other words, the tickets could be summarized to gain a full list of cameras in São Paulo. We assume that your treatment variable data will also be in the form of individual observations, from which information can be extracted about the location of individual points or entities. If not, the first few chunks of code in `map_matching.R` will need to be adjusted. 
 
-Within the context of the São Paulo example, we will begin by creating a new R project in a new R directory. Download all scripts included in this repository into that directory and create three new folders: "dataraw", "datapartial", and "datafinal". All of your raw data should be located in the "dataraw" folder, and the scripts will automatically put the intermediate and final data files into the "datapartial" and "datafinal" folders, respectively. The aforementioned tickets data would go in the "dataraw" folder, as would a data set for the outcome variable, which would be the accidents data for our project, and a road map of the relevant area. 
+Within the context of the São Paulo example, we will begin by creating a new R project in a new R directory. Download all scripts included in this repository into that directory and create three new folders: "dataraw", "datapartial", and "datafinal". All of your raw data should be located in the "dataraw" folder, and the scripts will automatically put the intermediate and final data files into the "datapartial" and "datafinal" folders, respectively. In the context of our project, the aforementioned tickets data would go in the "dataraw" folder, as would a data set for the outcome variable, which would be the accidents data for our project, and a road map of the relevant area. 
 
 To properly implement the scripts, you must have data in the proper format with the relevant variables. Although any data file types can work, the scripts are currently set up for .csv files. The data for your observations should have some kind of coordinates and the date, and a description of the location would also be benficial. In order to define dates relative to a minimum and maximum, you should also have the data for your outcome variable in a similar format. (We assume that your observations will have some kind of date component, but if this is not the case for your data, the scripts will need to be adjusted.) For the road map, we recommend using the shapefiles (.shp) produced by OpenStreetMap (OSM) or Uber Movement. With these two components, we can then match the points to a nearby road segment. 
 
-Here's an example of what the raw ticket data looks like:
+Here's an example of a row from the raw tickets data:
 
 | vehicle | location | year | month | day | hour | type | issuer | lat | long | vehicle_type | date |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2 | Av. Jacu-Pêssego | 2015 | 12 | 23 | 17:00 | speeding up to 20% of limit | camera | -23.573583 | -46.44551412 | car | 2015-12-23 |
 
-And here's what the camera data looks like once we summarize the tickets:
+And here's what a row from camera data looks like once we summarize the tickets:
 
 | lat | long | location | num_tickets | launch_month | last_month |
 | --- | --- | --- | --- | --- | --- |
 | -23.792105 | -46.72738 | Av. Sadamu Inoue  | 1173 | 25 | 29 |
 
-Starting with `map_matching.R`, users should alter the scripts to best suit their variables and needs. Path, file, and variable names are defined at the top of each script for easy alteration. However, simply plugging in the appropriate names will not guarantee that the script will work properly. Please go through the code chunk by chunk to verify the assumptions we needed to make when generalizing our scripts. 
+Starting with `map_matching.R`, users should alter the scripts to best suit their variables and needs. Path, file, and variable names are defined at the top of each script for easy alteration. However, simply plugging in the appropriate names will not guarantee that the script will work properly. Please go through the code chunk by chunk to verify the assumptions we needed to make when generalizing our scripts. As you go through, you will noticed one specific code chunk that definitely needs to be addressed:
+
+```r
+
+#Create new variables
+points <- points %>%
+  #Simplify location description
+  mutate(
+    #Convert to lowercase and remove periods
+    location_edit = tolower(str_remove_all(location, "\\.")),
+    
+    #TODO: Replace abbreviations with full word
+    #TODO: If possible, extract direction from location
+    #TODO: If possible, extract "to" and "from" parts of direction
+    
+    #Remove all non-alphanumeric characters - this line should be last
+    location_edit = str_replace_all(location_edit, "[^[:alnum:]]", "")
+  ) 
+  
+```
+
+The above chunk of code takes the original location description and alters is to improve the accuracy and speed of string comparisons. However, the alterations that need to be made are very project-specific, such as for defining what abbreviations need to be replaced. Although this chunk will need to be modified regardless of the project, other necessary changes may not be obvious until you try to run the script. Since every project is different, this will likely be a trial-and-error process.   
+
+Depending on your needs and the types of observations in your data, scripts 2 and 3 may be either irrelevant or impossible for your project. In that case, the files produced at the end of script 1 are in fact your final map-matched data. However, I would assume that some type of manual checking will be necessary regardless of the project or the data, so `manual_check.R` will also be important. 
+
+Assuming the files exported correctly from script 1, everything should load properly in script 2 regardless of your original data. Since the functions defined in `manual_check.R` are just to help with the manual checking process, I would expect that very few if not zero changes will need to be made to this script. We recommened implementing these functions to manually check the location of each point directly within this script, as this allows for easy replication. Two examples of how the helper functions can be implemented are included in the script:
+
+```r
+
+#Manual check workflow:
+
+#point 1 (example - camera found nearby)
+get_match_link(get_match_id(select_point_id = 1))
+replace_coords(check_id = 1, new_lat = 1, new_long = 1)
+
+#point 2 (example - camera not found)
+get_match_link(get_match_id(select_point_id = 2))
+point_found(point_found_id = 2, point_status = 0)
+
+```
 
 ## Acknowledgements
 

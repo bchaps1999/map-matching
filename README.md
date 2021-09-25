@@ -40,8 +40,9 @@ To properly implement the scripts, you must have data in the proper format with 
 
 Here's what the first few rows of our tickets data look like:
 
-vehicle | location | year | month | day | hour | type | issuer | lat | long | vehicle_type | date
-2 | Av. JacuPÃªs./N. Trab. (S. Mateus/S. Miguel) a menos 20 m da R Jaime Ribeiro Wright | 2015 | 12 | 23 | 17:00 | speeding up to 20% of limit | camera | -23.573583 | -46.44551412 | car | 2015-12-23
+| vehicle | location | year | month | day | hour | type | issuer | lat | long | vehicle_type | date |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2 | Av. JacuPÃªs./N. Trab. (S. Mateus/S. Miguel) a menos 20 m da R Jaime Ribeiro Wright | 2015 | 12 | 23 | 17:00 | speeding up to 20% of limit | camera | -23.573583 | -46.44551412 | car | 2015-12-23 |
 
 Starting with `map_matching.R`, users should alter the scripts to best suit their variables and needs. Path, file, and variable names are defined at the top of each script for easy alteration. However, simply plugging in the appropriate names will not guarantee that the script will work properly. Please go through the code chunk by chunk to verify the assumptions we needed to make when generalizing our scripts. 
 

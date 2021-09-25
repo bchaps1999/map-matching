@@ -1,6 +1,6 @@
-#Stage 3 - Checking entities for duplicates
+#Stage 3 - Checking points for duplicates
 
-#NOTE: Assumes "direction" exists for entities, can be modified to go without
+#NOTE: Assumes "direction" exists for points, can be modified to go without
 
 #Load libraries
 library(sf)
@@ -21,42 +21,42 @@ scripts_path <- r"(path_goes_here)"
 setwd(scripts_path)
 
 #Load data
-#Map-matched entities
-entities <- read_csv(file = paste(
+#Map-matched points
+points <- read_csv(file = paste(
   data_path,
-  r"(/datapartial/mm_entities_final.csv)",
+  r"(/datapartial/mm_points_final.csv)",
   sep = ""
 )) %>% 
   filter(found_on_map == 1) %>% 
   select(-link, -found_on_map, -match_id)
 #Map-matched monthly data
-entity_months <- read_csv(file = paste(
+point_months <- read_csv(file = paste(
   data_path,
-  r"(/datapartial/mm_entity_months_final.csv)",
+  r"(/datapartial/mm_point_months_final.csv)",
   sep = ""
 ))
 
-#Read shapefile for roads
+#Read shapefile for road segments
 roads <- read_sf(paste(data_path,
                        r"(/dataraw/maps/sp-shapefile/uber-osm-sp.shp)",
                        sep="")) %>% 
   st_as_sf() %>% 
   st_transform(3857)
 
-#Add road ID for each unique road segment
+#Add road segment ID for each unique road segment
 roads$road_id <- 1:nrow(roads)
 
-#Create dataframe with every possible pair of entities
-check_duplicates <- expand.grid(1:nrow(entities),1:nrow(entities)) %>%
+#Create dataframe with every possible pair of points
+check_duplicates <- expand.grid(1:nrow(points),1:nrow(points)) %>%
   apply(., 1, sort) %>% 
   t() %>% 
   as.data.frame() %>% 
   distinct() %>% 
   rename(id1 = V1, id2 = V2) %>% 
   filter(id1 != id2) %>% 
-  #Add other variables for both entities in each pair
-  left_join(entities, by = c("id1" = "entity_id")) %>% 
-  left_join(entities, by = c("id2" = "entity_id")) 
+  #Add other variables for both points in each pair
+  left_join(points, by = c("id1" = "point_id")) %>% 
+  left_join(points, by = c("id2" = "point_id")) 
 
 #Compute linear distance between points
 check_duplicates$distance <- 
@@ -85,23 +85,23 @@ duplicates <- check_duplicates %>%
 ids <- data.frame(id1 = vector(), 
                   id2 = vector())
 
-#Identify all pairs that include each entity ID
-for (i in 1:nrow(entities)) {
-  entity_id <- entities$entity_id[i]
+#Identify all pairs that include each point ID
+for (i in 1:nrow(points)) {
+  point_id <- points$point_id[i]
   #Find duplicates with ID in first column
   col1 <- duplicates %>% 
-    filter(id1 == entity_id) %>% 
+    filter(id1 == point_id) %>% 
     select(id2) %>% 
     pull()
   #Find duplicates with ID in second column
   col2 <- duplicates %>% 
-    filter(id2 == entity_id) %>% 
+    filter(id2 == point_id) %>% 
     select(id1) %>% 
     pull()
   #Combine all unique duplicates in one vector
   new_ids <- data.frame(id2 = unique(c(col1, col2))) %>% 
     #Add ID for camera being checked
-    mutate(id1 = entity_id) %>% 
+    mutate(id1 = point_id) %>% 
     select(id1, id2)
   #Add duplicate pairs to dataframe 
   ids <- rbind(ids, new_ids)
@@ -149,37 +149,37 @@ final_duplicates <- all_duplicates %>%
   #Identify distinct pairs
   distinct() %>% 
   #Make the first column the new ID
-  rename(new_entity_id = 1,
+  rename(new_point_id = 1,
          old_id = 2) %>% 
   #Remove pairs where new ID = old ID
-  filter(new_entity_id != old_id)
+  filter(new_point_id != old_id)
 
 #Remove rows where the new ID is the old ID somewhere else
-#Allows all entities in a duplicate group to have the same new ID
+#Allows all points in a duplicate group to have the same new ID
 final_duplicates <- final_duplicates %>% 
-  filter(!new_entity_id %in% .$old_id)
+  filter(!new_point_id %in% .$old_id)
 
-#Update entity IDs for duplicates
-entities <- entities %>% 
-  left_join(final_duplicates, by = c("entity_id" = "old_id")) %>% 
-  mutate(new_entity_id = ifelse(is.na(new_entity_id), 
-                                entity_id, new_entity_id)) %>% 
-  arrange(new_entity_id)
+#Update point IDs for duplicates
+points <- points %>% 
+  left_join(final_duplicates, by = c("point_id" = "old_id")) %>% 
+  mutate(new_point_id = ifelse(is.na(new_point_id), 
+                                point_id, new_point_id)) %>% 
+  arrange(new_point_id)
 
 #Reorder IDs for continuity by comparing ID to previous ID
-for (i in 2:nrow(entities)) {
-  if (entities$new_entity_id[i] == entities$new_entity_id[i-1]) {
-    entities$entity_id[i] <- entities$entity_id[i-1]
+for (i in 2:nrow(points)) {
+  if (points$new_point_id[i] == points$new_point_id[i-1]) {
+    points$point_id[i] <- points$point_id[i-1]
   }
   else {
-    entities$entity_id[i] <- entities$entity_id[i-1] + 1
+    points$point_id[i] <- points$point_id[i-1] + 1
   }
 }
 
-#Consolidate entities with same ID
-final_entities <- entities %>% 
-  select(-new_entity_id) %>% 
-  group_by(entity_id) %>% 
+#Consolidate points with same ID
+final_points <- points %>% 
+  select(-new_point_id) %>% 
+  group_by(point_id) %>% 
   mutate(
     #Take average for coordinates
     mm_lat = mean(mm_lat),
@@ -194,16 +194,16 @@ final_entities <- entities %>%
   ungroup()
 
 #Save data
-#Final data for entities
-final_entities %>%
+#Final data for points
+final_points %>%
   write_csv(.,
-            file = paste(data_path, "/datafinal/entities.csv",
+            file = paste(data_path, "/datafinal/points.csv",
                          sep = ""))
-#Final monthly data for entities
-entities %>% 
-  select(entity_id, mm_lat, mm_long, location, road_id) %>% 
-  left_join(select(entity_months, -entity_id)) %>%
-  group_by(entity_id, month_id) %>% 
+#Final monthly data for points
+points %>% 
+  select(point_id, mm_lat, mm_long, location, road_id) %>% 
+  left_join(select(point_months, -point_id)) %>%
+  group_by(point_id, month_id) %>% 
   mutate(mm_lat = mean(mm_lat),
          mm_long = mean(mm_long),
          launch_month = min(launch_month),
@@ -212,14 +212,14 @@ entities %>%
   slice(1) %>%
   ungroup() %>% 
   write_csv(.,
-            file = paste(data_path, "/datafinal/entity_months.csv",
+            file = paste(data_path, "/datafinal/point_months.csv",
                          sep = ""))
-#Shapefile for roads that are matched to a camera
+#Shapefile for road segments that are matched to a camera
 roads %>% 
   as.data.frame() %>% 
   select(road_id, geometry) %>% 
-  inner_join(final_entities) %>% 
+  inner_join(final_points) %>% 
   st_as_sf() %>% 
   st_write(.,
-           paste(data_path, "/datafinal/entity_matched_roads.shp",
+           paste(data_path, "/datafinal/point_matched_roads.shp",
                  sep = ""))

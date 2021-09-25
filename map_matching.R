@@ -1,4 +1,4 @@
-#Stage 1 - automated matching of entities to street map
+#Stage 1 - automated matching of points to street map
 
 #Load libraries - install if necessary
 library(janitor)
@@ -12,27 +12,44 @@ library(tidyverse)
 #Set number of digits
 options(digits = 7)
 
+#TODO: Create "dataraw", "datapartial", and "datafinal" folders in directory
+
 #Define paths for data and script locations
 data_path <- r"(path_goes_here)"
 scripts_path <- r"(path_goes_here)"
+
+#Set file names
+observations_file_name <- r"(/file_name_goes_here)"
+other_observations_file_name <- r"(/file_name_goes_here)"
+roads_shapefile_name <- r"(/file_name_goes_here)"
+
+#Primary data set should include the following vars:
+# "lat" = latitude of observation, CRS = 4326
+# "long" = longitude of observation, CRS = 4326
+# "location" = description of observation location, such as street address
+# "year" = year of observation
+# "month" = month of observation
+# "day" = day of observation
+
+#Other data sets should include similar variables
+#Rename variables and adjust script for missing variables as necessary
 
 #Set working directory
 setwd(scripts_path)
 
 #Load data for primary variable of interest
-#(Assumes variables for lat, long, year, month, day, and location already exist)
 observations <- read_csv(file = paste(data_path,
-                                r"(/file_name)",
+                                observations_file_name,
                                 sep="")) %>% 
   #Convert coordinates and date variables
-  mutate(lat = as.numeric(as.character(lat)), #Latitude (CRS = 4326)
-         long = as.numeric(as.character(long)), #Longitude (CRS = 4326)
+  mutate(lat = as.numeric(as.character(lat)),
+         long = as.numeric(as.character(long)),
          date = ymd(paste(year, month, day, sep="-")),
          location = as.character(location)) #Description of location or address
 
-#Load other data
+#Load other data, ie dependent variable
 other_observations <- read_csv(file = paste(data_path,
-                                      r"(/file_name)",
+                                      other_observations_file_name,
                                       sep="")) %>% 
   #Convert coordinates and date variables
   mutate(lat = as.numeric(as.character(lat)), #Latitude (CRS = 4326)
@@ -47,22 +64,22 @@ min_year <- min(year(min(other_observations$date)),
 max_year <- min(year(max(other_observations$date)), 
                 year(max(observations$date)))
 
-#Data with observations per entity per month
-entity_months <- observations %>% 
+#Data with observations per point per month
+point_months <- observations %>% 
   #Remove missing observations
   filter(!is.na(lat),!is.na(long), !is.na(date)) %>%
   #Create unique ID for each month based on min year
   mutate(month = month(date),
          year = year(date),
          month_id = (year - min_year)*12 + month) %>% 
-  #Identify unique entities per month
+  #Identify unique points per month
   group_by(lat, long, location, month_id) %>%
   summarize(num_observations = n(),
             .groups = "keep") %>% 
   ungroup()
 
-#Total observations per entity, launch of entity
-entities <- entity_months %>% 
+#Total observations per point, launch of point
+points <- point_months %>% 
   group_by(lat, long, location) %>%
   summarize(num_observations = sum(num_observations),
             #This assumes first and last recorded observation are important
@@ -77,52 +94,55 @@ rm(observations)
 rm(other_observations)
 
 #Create new variables
-entities <- entities %>%
+points <- points %>%
   #Simplify location description
   mutate(
+    #Convert to lowercase and remove periods
     location_edit = tolower(str_remove_all(location, "\\.")),
+    
     #TODO: Replace abbreviations with full word
     #TODO: If possible, extract direction from location
     #TODO: If possible, extract "to" and "from" parts of direction
-    #Remove all non-alphanumeric characters
+    
+    #Remove all non-alphanumeric characters - this line should be last
     location_edit = str_replace_all(location_edit, "[^[:alnum:]]", "")
   ) 
 
-#Create index for entities
-num_entities <- nrow(entities)
-entities$entity_id <- 1:num_entities
+#Create index for points
+num_points <- nrow(points)
+points$point_id <- 1:num_points
 
 #Add new variables to monthly data
-entity_months <- entity_months %>% 
-  left_join(select(entities, -num_observations)) %>% 
+point_months <- point_months %>% 
+  left_join(select(points, -num_observations)) %>% 
   select(-location_edit) 
 
-#Convert entities to sf object using coordinates
-entities <- entities %>% 
+#Convert points to sf object using coordinates
+points <- points %>% 
   mutate(geom = st_as_sfc(paste("POINT (",long," ",lat,")",sep=""),
                           crs = 4326)) %>% 
   st_as_sf() %>% 
   st_transform(crs = 3857)
 
-#Read shapefile for roads
+#Read shapefile for road segments
 roads <- read_sf(paste(data_path,
-                       r"(/file_name)",
+                       roads_shapefile_name,
                        sep="")) %>% 
-  #TODO: If necessary, change road name variable to "road_name"
-  #Create edited version of road name variable
+  #TODO: If necessary, change road segment name variable to "road_name"
+  #Create edited version of road segment name variable
   mutate(road_name_edit = tolower(road_name), 
          road_name_edit = str_remove_all(road_name_edit, " ")) %>% 
   st_as_sf() %>% 
   st_transform(3857)
 
-#Add road ID for each unique road segment
+#Add road segment ID for each unique road segment
 roads$road_id <- 1:nrow(roads)
 
-#Create buffer around each entity
-matches <- st_buffer(entities, dist = 25) %>% 
+#Create buffer around each point
+matches <- st_buffer(points, dist = 25) %>% 
   #Identify road segments within buffer
   st_join(roads, st_intersects) %>% 
-  select(entity_id, launch_month, last_month, lat, long, location, 
+  select(point_id, launch_month, last_month, lat, long, location, 
          location_edit, road_name, road_name_edit, road_id, num_observations
          # Add if they exist: direction, from, to
          ) %>% 
@@ -140,19 +160,19 @@ matches <- st_buffer(entities, dist = 25) %>%
 #Create index for each possible match for later examination
 matches$match_id <- 1:nrow(matches)
 
-#Create copy of data that uses road sfc instead of entity sfc
+#Create copy of data that uses road segment sfc instead of point sfc
 road_matches <- matches %>% 
   as.data.frame() %>% 
   left_join(as.data.frame(roads)) %>% 
   select(-geom) %>% 
   st_as_sf()
 
-#Create empty objects for measuring distance to nearest roads
+#Create empty objects for measuring distance to nearest road segments
 matches$dist_to_nearest <- vector(mode = "numeric", 
                                   length = nrow(matches))
 mm_points <- list()
 
-#Find closest point on each road to entity, record distance and new coords
+#Find closest point on each road segment to point, record distance and new coords
 for (i in 1:nrow(matches)) {
   nearest <-
     st_nearest_points(matches[i, ], road_matches[i, ])
@@ -181,32 +201,31 @@ match_scores <- matches %>%
                       mm_lat,",",mm_long,sep="")) %>% 
   select(-mm_point)
 
-#Data with only lowest score for each entity
-map_matched_entities <- match_scores %>%
-  group_by(entity_id) %>% 
+#Data with only lowest score for each point
+map_matched_points <- match_scores %>%
+  group_by(point_id) %>% 
   arrange(score) %>% 
   slice(1) %>% 
   ungroup() %>% 
-  select(entity_id, launch_month, last_month, mm_lat, mm_long, lat, long, 
+  select(point_id, launch_month, last_month, mm_lat, mm_long, lat, long, 
          location, road_name, road_id, link, match_id, num_observations
          # Add if they exist: direction, from, to
          )
 
 #Save data
-#TODO: Create "datapartial" folder in data path
 #Possible matches
 write_csv(match_scores,
           file = paste(data_path, "/datapartial/matches.csv",
                        sep = ""))
-#Map matched entities
+#Map matched points
 write_csv(map_matched_cameras,
           file = paste(data_path, "/datapartial/mm_cameras.csv",
                        sep = ""))
-#Monthly data for entities
-entity_months %>% 
+#Monthly data for points
+point_months %>% 
   write_csv(., file = paste(data_path, "/datapartial/camera_months.csv",
                             sep = ""))
-#Shapefile for possible road matches
+#Shapefile for possible road segment matches
 road_matches %>%
   st_write(., paste(data_path, "/datapartial/road_matches.shp",
                     sep = ""), append = FALSE)

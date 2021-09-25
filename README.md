@@ -38,11 +38,17 @@ Within the context of the São Paulo example, we will begin by creating a new R 
 
 To properly implement the scripts, you must have data in the proper format with the relevant variables. Although any data file types can work, the scripts are currently set up for .csv files. The data for your observations should have some kind of coordinates and the date, and a description of the location would also be benficial. In order to define dates relative to a minimum and maximum, you should also have the data for your outcome variable in a similar format. (We assume that your observations will have some kind of date component, but if this is not the case for your data, the scripts will need to be adjusted.) For the road map, we recommend using the shapefiles (.shp) produced by OpenStreetMap (OSM) or Uber Movement. With these two components, we can then match the points to a nearby road segment. 
 
-Here's what the first few rows of our tickets data look like:
+Here's an example of what the raw ticket data looks like:
 
 | vehicle | location | year | month | day | hour | type | issuer | lat | long | vehicle_type | date |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2 | Av. Jacu-Pêssego | 2015 | 12 | 23 | 17:00 | speeding up to 20% of limit | camera | -23.573583 | -46.44551412 | car | 2015-12-23 |
+
+And here's what the camera data looks like once we summarize the tickets:
+
+| lat | long | location | num_tickets | launch_month | last_month |
+| --- | --- | --- | --- | --- | --- |
+| -23.792105 | -46.72738 | Av. Sadamu Inoue  | 1173 | 25 | 29 |
 
 Starting with `map_matching.R`, users should alter the scripts to best suit their variables and needs. Path, file, and variable names are defined at the top of each script for easy alteration. However, simply plugging in the appropriate names will not guarantee that the script will work properly. Please go through the code chunk by chunk to verify the assumptions we needed to make when generalizing our scripts. 
 

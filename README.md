@@ -4,13 +4,14 @@ _A toolkit for matching point data (traffic cameras, accidents, crime locations,
 
 ## Background
 
-<img src="https://github.com/bchaps1999/map-matching/blob/master/images/Sao_Paulo.png" align="right" width="500" alt="A map of central São Paulo, Brazil">
+<img src="https://github.com/bchaps1999/map-matching/blob/master/images/Sao_Paulo.png" align="right" width="400" alt="A map of central São Paulo, Brazil">
 
 When conducting analyses involving vehicles or roads, geospatial data is only of limited use if it is not accurately matched to a map of the area. For example, if we want to know the effects of traffic camera placement on accidents, then it is necessary that we know exactly where each camera is located and on what road. A high level of accuracy is important especially with the treatment variable to limit attenuation bias, but it is also important for the response variable if we want to produce precise coefficients.
 
+<img src="https://github.com/bchaps1999/map-matching/blob/master/images/map_matching.png" align="right" width="400" alt="Two map-matched cameras">
+
 This repository contains generalized versions of scripts that match points to a road map based on the coordinates and a description of the location. These scripts were originally written to match traffic cameras to an OpenStreetMap road map, as part of a project that sought to analyze the impact of traffic cameras on accidents. In the context of that project, a data set containing almost 45 million traffic tickets from São Paulo, Brazil was used to identify unique traffic cameras in the city. Although the data included the coordinates of each camera along with a location description, the desired analysis required knowledge of the exact camera location relative to a road. To match the cameras to a road map, I wrote a series of R scripts, which are included here in a generalized form. These generalized scripts refers to "observations" and "points", which would be "tickets" and "cameras" in the context of our project. The scripts accomplish the following tasks:
 
-<img src="https://github.com/bchaps1999/map-matching/blob/master/images/final_gif.gif" align="right" width="300" alt="An example of the map-matching process">
 
 1. `map_matching.R` — Automatically match points to a road in their proximity that has a similar location description
 2. `manual_check.R` — Ease the manual checking of point locations through several helper functions
@@ -18,9 +19,9 @@ This repository contains generalized versions of scripts that match points to a 
 
 ## Description
 
-#### 1. `map_matching.R`
+<img src="https://github.com/bchaps1999/map-matching/blob/master/images/final_gif.gif" align="right" width="300" alt="An example of the map-matching process">
 
-<img src="https://github.com/bchaps1999/map-matching/blob/master/images/map_matching.png" align="right" width="400" alt="Two map-matched cameras">
+#### 1. `map_matching.R`
 
 The first script identifies all roads within a certain radius of each point, and then gives each road a score based on the distance from the camera and the similarity between the road name and the point location description. The road with the best score is selected as the match for a specific point, and the closest point on that road is then selected as the new map-matched coordinates for that point. An example of this is shown in the image at right, where the red dots are the original traffic camera locations and the blue dots use the map-matched coordinates.
 

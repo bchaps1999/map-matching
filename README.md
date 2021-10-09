@@ -1,5 +1,7 @@
 # Map-matching geospatial data using R
 
+_A toolkit for matching point data (traffic cameras, accidents, crime locations, etc.) to road segment data (e.g. OSM or Uber Movement road segments)_
+
 ## Background
 
 <img src="https://github.com/bchaps1999/map-matching/blob/master/images/Sao_Paulo.png" align="right" width="500" alt="A map of central São Paulo, Brazil">

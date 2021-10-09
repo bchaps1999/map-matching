@@ -8,6 +8,8 @@ _A toolkit for matching point data (traffic cameras, accidents, crime locations,
 
 When conducting analyses involving vehicles or roads, geospatial data is only of limited use if it is not accurately matched to a map of the area. For example, if we want to know the effects of traffic camera placement on accidents, then it is necessary that we know exactly where each camera is located and on what road. A high level of accuracy is important especially with the treatment variable to limit attenuation bias, but it is also important for the response variable if we want to produce precise coefficients.
 
+<img src="https://github.com/bchaps1999/map-matching/blob/master/images/final_gif.gif" align="right" width="400" alt="An example of the map-matching process">
+
 This repository contains generalized versions of scripts that match points to a road map based on the coordinates and a description of the location. These scripts were originally written to match traffic cameras to an OpenStreetMap road map, as part of a project that sought to analyze the impact of traffic cameras on accidents. In the context of that project, a data set containing almost 45 million traffic tickets from São Paulo, Brazil was used to identify unique traffic cameras in the city. Although the data included the coordinates of each camera along with a location description, the desired analysis required knowledge of the exact camera location relative to a road. To match the cameras to a road map, I wrote a series of R scripts, which are included here in a generalized form. These generalized scripts refers to "observations" and "points", which would be "tickets" and "cameras" in the context of our project. The scripts accomplish the following tasks:
 
 1. `map_matching.R` — Automatically match points to a road in their proximity that has a similar location description
@@ -18,13 +20,13 @@ This repository contains generalized versions of scripts that match points to a 
 
 #### 1. `map_matching.R`
 
-<img src="https://github.com/bchaps1999/map-matching/blob/master/images/map_matching.png" align="right" width="400" alt="An example of map-matching">
+<img src="https://github.com/bchaps1999/map-matching/blob/master/images/map_matching.png" align="right" width="400" alt="Two map-matched cameras">
 
 The first script identifies all roads within a certain radius of each point, and then gives each road a score based on the distance from the camera and the similarity between the road name and the point location description. The road with the best score is selected as the match for a specific point, and the closest point on that road is then selected as the new map-matched coordinates for that point. An example of this is shown in the image at right, where the red dots are the original traffic camera locations and the blue dots use the map-matched coordinates.
 
 #### 2. `manual_check.R`
 
-<img src="https://github.com/bchaps1999/map-matching/blob/master/images/map_match_function.png" align="right" width="400" alt="An example of the map-match function">
+<img src="https://github.com/bchaps1999/map-matching/blob/master/images/streetview.png" align="right" width="400" alt="An example of a traffic camera found on Street View">
 
 The second script includes a handful of helper functions that support the manual checking process. In the case of the São Paulo project, traffic cameras were visible on Google Maps Street View, which allows the location of each camera to be easily verified. Although each camera still needed to be individually checked, the functions accelerated this process by automating tasks like replacing bad coordinates with better ones. However, depending on what the points represent, manual checking may either be unnecessary or impossible for other projects. The image at right shows the output of the `map_match` function for one of the cameras in the data: it shows the original camera location (blue), the map-matched camera location (red), and the possible road segment matches.
 
@@ -97,6 +99,6 @@ This README serves as a brief overview of what the toolkit accomplishes and how 
 
 ## Acknowledgements
 
-I would like to thank Professor Gabriel Kreindler of Harvard University for bringing me onto the team and for all his guidance and support throughout the process. Special thanks also to Professor Peter Christensen of the University of Illinois Urbana-Champaign and Professor Renato Schwambach Vieira of the Catholic University of Brasília.
+*This code was developed by Brendan Chapuis as part of a project on the impact of traffic cameras on driver behavior with Gabriel Kreindler of Harvard University, Peter Christensen of the University of Illinois Urbana-Champaign, and Renato Schwambach Vieira of the Catholic University of Brasília.*
 
-*This project was supported by the Harvard University Data Science Initiative Faculty Special Projects Fund for the project A Toolkit for Precise Geographic Data on Urban Roads: Application to Measuring the Impact of Automated Cameras on Speeding and Road Crashes*
+*This project was supported by the Harvard University Data Science Initiative Faculty Special Projects Fund for the project A Toolkit for Precise Geographic Data on Urban Roads: Application to Measuring the Impact of Automated Cameras on Speeding and Road Crashes.*

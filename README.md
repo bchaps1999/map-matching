@@ -8,9 +8,9 @@ _A toolkit for matching point data (traffic cameras, accidents, crime locations,
 
 When conducting analyses involving vehicles or roads, geospatial data is only of limited use if it is not accurately matched to a map of the area. For example, if we want to know the effects of traffic camera placement on accidents, then it is necessary that we know exactly where each camera is located and on what road. A high level of accuracy is important especially with the treatment variable to limit attenuation bias, but it is also important for the response variable if we want to produce precise coefficients.
 
-<img src="https://github.com/bchaps1999/map-matching/blob/master/images/final_gif.gif" align="right" width="300" alt="An example of the map-matching process">
-
 This repository contains generalized versions of scripts that match points to a road map based on the coordinates and a description of the location. These scripts were originally written to match traffic cameras to an OpenStreetMap road map, as part of a project that sought to analyze the impact of traffic cameras on accidents. In the context of that project, a data set containing almost 45 million traffic tickets from São Paulo, Brazil was used to identify unique traffic cameras in the city. Although the data included the coordinates of each camera along with a location description, the desired analysis required knowledge of the exact camera location relative to a road. To match the cameras to a road map, I wrote a series of R scripts, which are included here in a generalized form. These generalized scripts refers to "observations" and "points", which would be "tickets" and "cameras" in the context of our project. The scripts accomplish the following tasks:
+
+<img src="https://github.com/bchaps1999/map-matching/blob/master/images/final_gif.gif" align="right" width="300" alt="An example of the map-matching process">
 
 1. `map_matching.R` — Automatically match points to a road in their proximity that has a similar location description
 2. `manual_check.R` — Ease the manual checking of point locations through several helper functions

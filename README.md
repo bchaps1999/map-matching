@@ -19,7 +19,7 @@ This repository contains generalized versions of scripts that match points to a 
 
 ## Description
 
-<img src="https://github.com/bchaps1999/map-matching/blob/master/images/final_gif.gif" align="right" width="300" alt="An example of the map-matching process">
+<img src="https://github.com/bchaps1999/map-matching/blob/master/images/map_matching_process.gif" align="right" width="300" alt="An example of the map-matching process">
 
 #### 1. `map_matching.R`
 
@@ -49,11 +49,17 @@ Here's an example of a row from the raw tickets data:
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2 | Av. Jacu-Pêssego | 2015 | 12 | 23 | 17:00 | speeding up to 20% of limit | camera | -23.573583 | -46.44551412 | car | 2015-12-23 |
 
-And here's what a row from camera data looks like once we summarize the tickets:
+Here's what a row from camera data looks like once we summarize the tickets:
 
 | lat | long | location | num_tickets | launch_month | last_month |
 | --- | --- | --- | --- | --- | --- |
 | -23.792105 | -46.72738 | Av. Sadamu Inoue  | 1173 | 25 | 29 |
+
+And here's what a road segment from the road shapefile looks like in dataframe form (note that `osmname` is the road name, `geometry` is the unique identifier for the road segment, and `geometry` is the simple features column):
+
+| osmname | osmstartno | osmhighway | osmendnode | osmwayid | geometry | road_id |
+| --- | --- | --- | --- | --- | --- | --- |
+| Rua Cláudio Artaria | 5304823442 | residential | 821347762 | 68167330 | geometry_goes_here | 1 |
 
 Starting with `map_matching.R`, users should alter the scripts to best suit their variables and needs. Path, file, and variable names are defined at the top of each script for easy alteration. However, simply plugging in the appropriate names will not guarantee that the script will work properly. Please go through the code chunk by chunk to verify the assumptions we needed to make when generalizing our scripts. As you go through, you will notice one specific code chunk that definitely needs to be addressed:
 

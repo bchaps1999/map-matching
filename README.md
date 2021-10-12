@@ -101,7 +101,7 @@ point_found(point_found_id = 2, point_status = 0)
 
 ```
 
-This README serves as a brief overview of what the toolkit accomplishes and how you can implement it for your own project. For a more thorough explanation of what the code accomplishes, the decisions behind the code, and how the scripts were implemented in our own project, please see our article on Medium.
+This README serves as a brief overview of what the toolkit accomplishes and how you can implement it in your own project. For a more thorough explanation of what the code does, the decisions behind the code, and how the scripts were implemented in our own project, please see our [article on Medium](https://medium.com/@brendan.chapuis/map-matching-geospatial-data-using-r-a-case-study-in-s%C3%A3o-paulo-d26e5efb9642).
 
 ## Acknowledgements
 
